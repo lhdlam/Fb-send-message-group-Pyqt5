@@ -54,7 +54,7 @@ class Ui_Form(object):
         self.btn_cookie.setGeometry(QtCore.QRect(30, 40, 141, 41))
         self.btn_cookie.setObjectName("btn_cookie")
         self.lbl_notification = QtWidgets.QLabel(self.tab)
-        self.lbl_notification.setGeometry(QtCore.QRect(390, 10, 271, 31))
+        self.lbl_notification.setGeometry(QtCore.QRect(200, 10, 571, 31))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -62,6 +62,7 @@ class Ui_Form(object):
         self.lbl_notification.setSizePolicy(sizePolicy)
         self.lbl_notification.setStyleSheet("font: 75 12pt \"MS Shell Dlg 2\";\n"
 "color: rgb(255, 0, 0)")
+        self.lbl_notification.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_notification.setObjectName("lbl_notification")
         self.btn_export = QtWidgets.QPushButton(self.tab)
         self.btn_export.setGeometry(QtCore.QRect(730, 150, 141, 41))
@@ -165,7 +166,7 @@ class Ui_Form(object):
 "color: rgb(0, 0, 0)")
         self.lbl_notification_5.setObjectName("lbl_notification_5")
         self.lbl_notification_page = QtWidgets.QLabel(self.tab_3)
-        self.lbl_notification_page.setGeometry(QtCore.QRect(320, 0, 271, 31))
+        self.lbl_notification_page.setGeometry(QtCore.QRect(220, 0, 541, 31))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -173,6 +174,7 @@ class Ui_Form(object):
         self.lbl_notification_page.setSizePolicy(sizePolicy)
         self.lbl_notification_page.setStyleSheet("font: 75 12pt \"MS Shell Dlg 2\";\n"
 "color: rgb(255, 0, 0)")
+        self.lbl_notification_page.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_notification_page.setObjectName("lbl_notification_page")
         self.tabWidget.addTab(self.tab_3, "")
         self.tab_2 = QtWidgets.QWidget()
@@ -190,16 +192,6 @@ class Ui_Form(object):
         self.txt_msg = QtWidgets.QTextEdit(self.tab_2)
         self.txt_msg.setGeometry(QtCore.QRect(320, 270, 571, 231))
         self.txt_msg.setObjectName("txt_msg")
-        self.lbl_number_msg = QtWidgets.QLabel(self.tab_2)
-        self.lbl_number_msg.setGeometry(QtCore.QRect(100, 460, 111, 31))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lbl_number_msg.sizePolicy().hasHeightForWidth())
-        self.lbl_number_msg.setSizePolicy(sizePolicy)
-        self.lbl_number_msg.setStyleSheet("font: 75 12pt \"MS Shell Dlg 2\";\n"
-"color: rgb(0, 0, 0)")
-        self.lbl_number_msg.setObjectName("lbl_number_msg")
         self.btn_import_cookie = QtWidgets.QPushButton(self.tab_2)
         self.btn_import_cookie.setGeometry(QtCore.QRect(90, 76, 121, 41))
         self.btn_import_cookie.setStyleSheet("\n"
@@ -239,7 +231,7 @@ class Ui_Form(object):
         self.btn_run_msg.setGeometry(QtCore.QRect(90, 290, 121, 41))
         self.btn_run_msg.setObjectName("btn_run_msg")
         self.lbl_notification_msg = QtWidgets.QLabel(self.tab_2)
-        self.lbl_notification_msg.setGeometry(QtCore.QRect(100, 410, 121, 31))
+        self.lbl_notification_msg.setGeometry(QtCore.QRect(10, 410, 301, 31))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -247,6 +239,7 @@ class Ui_Form(object):
         self.lbl_notification_msg.setSizePolicy(sizePolicy)
         self.lbl_notification_msg.setStyleSheet("font: 75 12pt \"MS Shell Dlg 2\";\n"
 "color: rgb(255, 0, 0)")
+        self.lbl_notification_msg.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_notification_msg.setObjectName("lbl_notification_msg")
         self.btn_import_list_member = QtWidgets.QPushButton(self.tab_2)
         self.btn_import_list_member.setGeometry(QtCore.QRect(90, 20, 121, 41))
@@ -289,7 +282,7 @@ class Ui_Form(object):
         self.tabWidget.addTab(self.tab_2, "")
 
         self.retranslateUi(Form)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
@@ -403,7 +396,6 @@ class Ui_Form(object):
         self.lbl_notification_page.setText(_translate("Form", "TextLabel"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("Form", "Tab 2"))
         self.lbl_tab_2.setText(_translate("Form", "Message"))
-        self.lbl_number_msg.setText(_translate("Form", "TextLabel"))
         self.btn_import_cookie.setText(_translate("Form", "Import Cookie"))
         self.btn_stop_msg.setStyleSheet(_translate("Form", "\n"
 "                        QPushButton {\n"

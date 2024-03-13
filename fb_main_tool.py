@@ -19,6 +19,7 @@ import random
 import string
 import sys
 import random
+import numpy as np
 
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -59,7 +60,6 @@ class WorkerThread(QThread):
             self.result_signal.emit(user_id_str, password_str, cookie, status, result_status)
         self.done_signal.emit()
         
-            
     def generate_random_string(self, length=8):
         characters = string.ascii_letters + string.digits  # Ký tự chữ cái và số
         random_string = ''.join(random.choice(characters) for _ in range(length))
@@ -278,7 +278,6 @@ class WorkerThread2(QThread):
         list_link = []
         for element in elements:
             element_html = element.get_attribute("innerHTML")
-            # print(element_html)
             sleep(generate_random_float(0.7,1.2))
             # Sử dụng BeautifulSoup để phân tích HTML
             soup = BeautifulSoup(element_html, 'html.parser')
@@ -298,32 +297,33 @@ class WorkerThread3(QThread):
     result_signal = pyqtSignal(int, name="workerThreadResult3")
     done_signal = pyqtSignal()
 
-    def __init__(self, images,list_members,list_cookie, parent=None):
+    def __init__(self, images,list_members,list_cookie, msg_value, parent=None):
         super(WorkerThread3, self).__init__(parent)
         self.images = images
         self.list_members = list_members
         self.list_cookie = list_cookie
+        self.msg_value = msg_value
 
         self.stopped = False
 
     def run(self):
         # chia list member truoc khi truyen vao cho moi cookie xu ly
-        chunk_size = len(self.list_members)//len(self.list_cookie)
-        list_member_new  = chunk_list(self.list_members,chunk_size)
+        list_member_new  = np.array_split(self.list_members,len(self.list_cookie))
         ##########
         for index, cookie in enumerate(self.list_cookie):
             if self.stopped:
                 break
             # list_member_divide = list_member[index:index+]
-            run_send_msg = self.send_msg(cookie, list_member_new[index], self.images)
+            conver_list_member = list_member_new[index].tolist()
+            run_send_msg = self.send_msg(cookie, conver_list_member, self.images, self.msg_value)
+            sleep(generate_random_float(0.7,1.2))
             self.browser.quit()
-            
             sleep(generate_random_float(0.7,1.2))
             # Delete data chrome
             path_data_fb_delete = os.path.join(self.current_directory, 'facebook', f'profile{self.sanitized_id_fb}')
             self.delete_folder(path_data_fb_delete)
-
-            self.result_signal.emit(1)
+            sleep(generate_random_float(0.7,1.2))
+            
         self.done_signal.emit()
         
     def generate_random_string(self, length=8):
@@ -372,7 +372,7 @@ class WorkerThread3(QThread):
             print(f"Error deleting folder '{folder_path}': {e}")
 
 
-    def send_msg(self,cookie, list_members, images):
+    def send_msg(self,cookie, list_members, images, msg_value):
         path_data_fb = 'facebook'
         # # Delete data chrome
         # self.delete_folder(path_data_fb)
@@ -409,8 +409,16 @@ class WorkerThread3(QThread):
         for member in list_members:
             path_member = 'https://www.facebook.com' + member
             self.browser.get(path_member)
+            sleep(generate_random_float(2.0,3.9))
             try:
-                sleep(generate_random_float(1.0,1.9))
+                # add friend
+                friend_path = "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[1]/div[1]/div[2]/div/div/div/div[4]/div/div/div[2]/div/div/div"
+                add_fr = self.browser.find_element(By.XPATH, friend_path)
+                add_fr.click()
+            except:
+                pass
+            try:
+                sleep(generate_random_float(1.0,2.9))
                 xpath_msg = '/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[1]/div[1]/div[2]/div/div/div/div[4]/div/div/div[1]/div/div/div'
                 # xpath_msg = "//div[@aria-label='Nhắn tin']"
                 check_msg = self.browser.find_element(By.XPATH, xpath_msg)
@@ -420,27 +428,25 @@ class WorkerThread3(QThread):
                     xpath_image = "//input[@type='file']"
                     add_friend = self.browser.find_element(By.XPATH, xpath_image)
                     sleep(generate_random_float(1.0,1.5))
-                    # print("list_images",list_images)
                     add_friend.send_keys(images)
                 # # Chọn ô nhập tin nhắn
                 # message_input = driver.find_element_by_xpath("//div[@role='textbox']")
-                xpath_chat = "//div[@role='textbox']"
-                chat = self.browser.find_element(By.XPATH, xpath_chat)
-                # Gửi tin nhắn với ảnh
-                chat.send_keys("Xin chào anh/chị", Keys.ENTER)
-                sleep(generate_random_float(1.0,1.9))
-                chat.send_keys("Giá chỉ 12K/1 trái, 14k/trái", Keys.ENTER)
-                sleep(generate_random_float(1.0,1.9))
-                chat.send_keys("Dừa xiêm đỏ nguyên chất bến tre", Keys.ENTER)
-                sleep(generate_random_float(1.0,1.9))
-                chat.send_keys("Dung tích nước trên 330ml", Keys.ENTER)
-                # Chờ ảnh được tải lên
-                sleep(generate_random_float(0.5,1.2))
+                if len(msg_value) != 0:
+                    xpath_chat = "//div[@role='textbox']"
+                    chat = self.browser.find_element(By.XPATH, xpath_chat)
+                    # Gửi tin nhắn với ảnh
+                    msg_array = msg_value.split('\n')
+                    for msg in msg_array:
+                        sleep(generate_random_float(1.0,1.9))
+                        chat.send_keys(msg, Keys.ENTER)
+                sleep(generate_random_float(1.0,1.9))                 
                 print("Done")
-                return "Done Send"
+                self.result_signal.emit(1)
             except Exception as e:
-                print(e)
+                print("Skip...")
                 continue
+        return "Done Send"
+
 class AddFriendFacebook(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -480,7 +486,8 @@ class AddFriendFacebook(QMainWindow):
         self.ui.lbl_cookie.setText('')
         self.ui.lbl_cookie_page.setText('')
         self.ui.lbl_notification.setText('')
-
+        
+        self.ui.tabWidget.setCurrentIndex(0)
 
         self.ui.btn_run.setEnabled(False)
         self.ui.btn_stop.setEnabled(False)
@@ -522,11 +529,14 @@ class AddFriendFacebook(QMainWindow):
         self.ui.btn_stop_msg.clicked.connect(self.stop_msg)
 
         self.ui.lbl_notification_msg.setText('')
-        self.ui.lbl_number_msg.setText('')
         self.ui.lbl_members_link.setText('')
         self.ui.lbl_cookie_link.setText('')
         self.ui.lbl_images_msg.setText('')
+        self.ui.txt_msg.setText('')
 
+
+        self.ui.btn_run_msg.setEnabled(False)
+        self.ui.btn_stop_msg.setEnabled(False)
 
 
     def import_members(self):
@@ -543,6 +553,8 @@ class AddFriendFacebook(QMainWindow):
         self.file_path_cookie_msg, _ = QFileDialog.getOpenFileName(None, "Select ID FB File", "", "Text Files (*.ods *.xlsx *.xls);;All Files (*)")
         if self.file_path_cookie_msg:
             self.ui.lbl_cookie_link.setText(self.file_path_cookie_msg)
+            self.ui.btn_run_msg.setEnabled(True)
+            self.ui.btn_stop_msg.setEnabled(True)
 
     def run_msg(self):
         # self.ui.btn_stop.setEnabled(True)
@@ -558,44 +570,47 @@ class AddFriendFacebook(QMainWindow):
         # self.list_password = df_list_cookie.iloc[:, 1].tolist()
         self.list_cookie = df_list_cookie.iloc[:, 2].tolist()
 
-        # self.images =  self.ui.list_image.selectedItems()
+        msg_value = self.ui.txt_msg.toPlainText()
 
-        # print("list_images", self.images)
-
-        # self.ui.tableWidget.setRowCount(0) 
+            
         number_tab = self.ui.txt_thread_msg.text()
-        thread = int(number_tab)
+        if len(number_tab) == 0:
+            self.ui.lbl_notification_msg.setText("Please enter Thread !!!")
+        else:
+            if len(msg_value) == 0:
+                self.ui.lbl_notification_msg.setText("Please enter message !!!")
+        if len(number_tab) != 0 and len(msg_value) != 0:
+            self.ui.lbl_notification_msg.setText("Running...")
+            thread = int(number_tab)
+            list_member_conver = np.array_split(self.list_members, thread)
+            list_cookie_conver = np.array_split(self.list_cookie, thread)
 
-        step_member = len(self.list_members)//thread
-        step_cookie = len(self.list_cookie)//thread
-        list_member_conver = chunk_list(self.list_members, step_member)
-        list_cookie_conver = chunk_list(self.list_cookie, step_cookie)
-        
-        chunks = [
-            (
-                self.file_path_images,
-                list_member_conver[i],
-                list_cookie_conver[i]
-            )
-            for i in range(0, thread)
-        ]
+            chunks = [
+                (
+                    self.file_path_images,
+                    list_member_conver[i].tolist(),
+                    list_cookie_conver[i].tolist(),
+                    msg_value
+                )
+                for i in range(0, thread)
+            ]
 
-        self.worker_threads = []
-        for chunk in chunks:
-            worker_thread = WorkerThread3(*chunk)
-            worker_thread.result_signal.connect(self.on_thread_result_msg)
-            worker_thread.done_signal.connect(self.on_thread_done_3)
-            self.worker_threads.append(worker_thread)
-            worker_thread.start()
-            # Check if the license key is still valid
-            expiration_date_str = "25/05/2024"
-            if self.is_license_key_valid(expiration_date_str):
-                # Key is valid
-                print("License key is still valid.")
-            else:
-                # Key has expired
-                print("License key has expired.")
-                self.ui.lbl_notification.setText('License key has expired...')
+            self.worker_threads = []
+            for chunk in chunks:
+                worker_thread = WorkerThread3(*chunk)
+                worker_thread.result_signal.connect(self.on_thread_result_msg)
+                worker_thread.done_signal.connect(self.on_thread_done_3)
+                self.worker_threads.append(worker_thread)
+                worker_thread.start()
+                # Check if the license key is still valid
+                expiration_date_str = "16/03/2024"
+                if self.is_license_key_valid(expiration_date_str):
+                    # Key is valid
+                    print("License key is still valid.")
+                else:
+                    # Key has expired
+                    print("License key has expired.")
+                    self.ui.lbl_notification.setText('License key has expired...')
 
     def stop_msg(self):
         for worker_thread in self.worker_threads:
@@ -680,105 +695,125 @@ class AddFriendFacebook(QMainWindow):
 
 
     def run(self):
-        self.ui.btn_stop.setEnabled(True)
-        self.ui.btn_export.setEnabled(True)
-        self.ui.lbl_notification.setText('Running')
-        # df_list_friend = pd.read_excel(self.file_path_id)
-        # global list_id_friend
-        # list_id_friend = df_list_friend.iloc[:, 0].tolist()
+        if len(self.file_path_cookie) ==0:
+            self.ui.lbl_notification.setText('Please import account!')
+        if len(self.ui.txt_thread.text()) ==0:
+            self.ui.lbl_notification.setText('Please enter number tab!')
+            
+        if len(self.file_path_cookie) !=0 and len(self.ui.txt_thread.text()) !=0:
+            self.ui.btn_stop.setEnabled(True)
+            self.ui.btn_export.setEnabled(True)
+            self.ui.lbl_notification.setText('Running...')
+            # df_list_friend = pd.read_excel(self.file_path_id)
+            # global list_id_friend
+            # list_id_friend = df_list_friend.iloc[:, 0].tolist()
 
-        df_list_cookie = pd.read_excel(self.file_path_cookie)
-        self.list_id_fb = df_list_cookie.iloc[:, 0].tolist()
-        self.list_password = df_list_cookie.iloc[:, 1].tolist()
-        self.list_cookie = df_list_cookie.iloc[:, 2].tolist()
+            df_list_cookie = pd.read_excel(self.file_path_cookie)
+            self.list_id_fb = df_list_cookie.iloc[:, 0].tolist()
+            self.list_password = df_list_cookie.iloc[:, 1].tolist()
+            self.list_cookie = df_list_cookie.iloc[:, 2].tolist()
 
-        self.ui.tableWidget.setRowCount(0) 
+            self.ui.tableWidget.setRowCount(0) 
 
-        number_tab = self.ui.txt_thread.text()
-        thread = int(number_tab)
-        chunk_size = len(self.list_cookie) // thread
-        list_cookies_convert = chunk_list(self.list_cookie, chunk_size)
-        ist_id_fb_convert = chunk_list(self.list_id_fb, chunk_size)
-        list_password_convert = chunk_list(self.list_password, chunk_size)
-        chunks = [
-            (
-                list_cookies_convert[i],
-                ist_id_fb_convert[i],
-                list_password_convert[i]
-            )
-            for i in range(0, thread)
-        ]
+            number_tab = self.ui.txt_thread.text()
+            thread = int(number_tab)
+            list_cookies_convert = np.array_split(self.list_cookie, thread)
+            ist_id_fb_convert = np.array_split(self.list_id_fb, thread)
+            list_password_convert = np.array_split(self.list_password, thread)
+            chunks = [
+                (
+                    list_cookies_convert[i].tolist(),
+                    ist_id_fb_convert[i].tolist(),
+                    list_password_convert[i].tolist()
+                )
+                for i in range(0, thread)
+            ]
 
-        self.worker_threads = []
-        for chunk in chunks:
-            worker_thread = WorkerThread(*chunk)
-            worker_thread.result_signal.connect(self.on_thread_result)
-            worker_thread.done_signal.connect(self.on_thread_done)
-            self.worker_threads.append(worker_thread)
-            worker_thread.start()
-            # Check if the license key is still valid
-            expiration_date_str = "25/05/2024"
-            if self.is_license_key_valid(expiration_date_str):
-                # Key is valid
-                print("License key is still valid.")
-            else:
-                # Key has expired
-                print("License key has expired.")
-                self.ui.lbl_notification.setText('License key has expired...')
+            self.worker_threads = []
+            for chunk in chunks:
+                worker_thread = WorkerThread(*chunk)
+                worker_thread.result_signal.connect(self.on_thread_result)
+                worker_thread.done_signal.connect(self.on_thread_done)
+                self.worker_threads.append(worker_thread)
+                worker_thread.start()
+                # Check if the license key is still valid
+                expiration_date_str = "16/03/2024"
+                if self.is_license_key_valid(expiration_date_str):
+                    # Key is valid
+                    print("License key is still valid.")
+                else:
+                    # Key has expired
+                    print("License key has expired.")
+                    self.ui.lbl_notification.setText('License key has expired...')
 
 
     def run_page(self):
-        self.ui.btn_stop_page.setEnabled(True)
-        self.ui.btn_export_page.setEnabled(True)
-        self.ui.lbl_notification_page.setText('Running')
-        self.ui.tableWidget_page.setRowCount(0)  
+        if len(self.file_path_cookie_page) ==0:
+            self.ui.lbl_notification_page.setText('Please import account!')
+        if len(self.ui.txt_group_page.toPlainText()) ==0:
+            self.ui.lbl_notification_page.setText('Please enter link group!')
+        if len(self.file_path_cookie_page) !=0 and len(self.ui.txt_group_page.toPlainText()) !=0:
+            self.ui.btn_stop_page.setEnabled(True)
+            self.ui.btn_export_page.setEnabled(True)
+            self.ui.lbl_notification_page.setText('Running')
+            self.ui.tableWidget_page.setRowCount(0)  
 
-        df_list_cookie = pd.read_excel(self.file_path_cookie_page)
-        self.list_cookie = df_list_cookie.iloc[:, 2].tolist()
-        link_group = self.ui.txt_group_page.toPlainText()
-        self.ui.tableWidget.setRowCount(0) 
+            df_list_cookie = pd.read_excel(self.file_path_cookie_page)
+            self.list_cookie = df_list_cookie.iloc[:, 2].tolist()
+            link_group = self.ui.txt_group_page.toPlainText()
+            if "?" in link_group:
+                link_group = link_group.split("?")[0]
 
-        chunk_size = len(self.list_cookie) // 1
-        chunks = [
-            (
-                self.list_cookie[i:i + chunk_size],
-                link_group,
-            )
-            for i in range(0, len(self.list_cookie), chunk_size)
-        ]
+            self.ui.tableWidget.setRowCount(0) 
 
-        self.worker_threads = []
-        for chunk in chunks:
-            worker_thread = WorkerThread2(*chunk)
-            worker_thread.result_signal.connect(self.on_thread_result_page)
-            worker_thread.done_signal.connect(self.on_thread_done_2)
-            self.worker_threads.append(worker_thread)
-            worker_thread.start()
-            # Check if the license key is still valid
-            expiration_date_str = "25/05/2024"
-            if self.is_license_key_valid(expiration_date_str):
-                # Key is valid
-                print("License key is still valid.")
-            else:
-                # Key has expired
-                print("License key has expired.")
-                self.ui.lbl_notification.setText('License key has expired...')
+            chunk_size = len(self.list_cookie) // 1
+            chunks = [
+                (
+                    self.list_cookie[i:i + chunk_size],
+                    link_group,
+                )
+                for i in range(0, len(self.list_cookie), chunk_size)
+            ]
+
+            self.worker_threads = []
+            for chunk in chunks:
+                worker_thread = WorkerThread2(*chunk)
+                worker_thread.result_signal.connect(self.on_thread_result_page)
+                worker_thread.done_signal.connect(self.on_thread_done_2)
+                self.worker_threads.append(worker_thread)
+                worker_thread.start()
+                # Check if the license key is still valid
+                expiration_date_str = "16/03/2024"
+                if self.is_license_key_valid(expiration_date_str):
+                    # Key is valid
+                    print("License key is still valid.")
+                else:
+                    # Key has expired
+                    print("License key has expired.")
+                    self.ui.lbl_notification.setText('License key has expired...')
 
     def on_thread_done(self):
-        sleep(15)
-        self.stop_threads()
-        self.ui.lbl_notification.setText('Done')
+        # self.stop_threads()
+        # self.ui.lbl_notification.setText('Done')
+        if all(thread.isFinished() for thread in self.worker_threads):
+                    print("All threads are done.")
+                    self.ui.lbl_notification.setText('Done')
 
     def on_thread_done_2(self):
-        sleep(5)
-        self.stop_threads()
-        self.ui.lbl_notification_page.setText('Done')
+        # self.stop_threads()
+        # self.ui.lbl_notification_page.setText('Done')
+        if all(thread.isFinished() for thread in self.worker_threads):
+                    print("All threads are done.")
+                    self.ui.lbl_notification_page.setText('Done')
 
 
     def on_thread_done_3(self):
-        sleep(30)
-        self.stop_threads()
-        self.ui.lbl_notification_msg.setText("Done")
+        # self.stop_threads()
+        self.ui.lbl_notification_msg.setText("Sending {} message".format(self.result))
+        if all(thread.isFinished() for thread in self.worker_threads):
+                    print("All threads are done.")
+                    # Add any additional actions to perform when all threads are done
+                    self.ui.lbl_notification_msg.setText("Done send {} message".format(self.result))
 
     def stop_threads(self):
         for worker_thread in self.worker_threads:
@@ -788,6 +823,7 @@ class AddFriendFacebook(QMainWindow):
             worker_thread.wait()
 
         self.worker_threads = []
+        self.ui.lbl_notification_msg.setText("Done send {} message".format(self.result))
 
     def on_thread_result(self, id, password, cookie, status, result_status):
         row_position = self.ui.tableWidget.rowCount()

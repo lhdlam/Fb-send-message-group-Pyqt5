@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -183,9 +183,9 @@
     <widget class="QLabel" name="lbl_notification">
      <property name="geometry">
       <rect>
-       <x>390</x>
+       <x>200</x>
        <y>10</y>
-       <width>271</width>
+       <width>571</width>
        <height>31</height>
       </rect>
      </property>
@@ -201,6 +201,9 @@ color: rgb(255, 0, 0)</string>
      </property>
      <property name="text">
       <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
     <widget class="QPushButton" name="btn_export">
@@ -481,9 +484,9 @@ color: rgb(0, 0, 0)</string>
     <widget class="QLabel" name="lbl_notification_page">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>220</x>
        <y>0</y>
-       <width>271</width>
+       <width>541</width>
        <height>31</height>
       </rect>
      </property>
@@ -499,6 +502,9 @@ color: rgb(255, 0, 0)</string>
      </property>
      <property name="text">
       <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </widget>
@@ -655,9 +661,9 @@ color: rgb(255, 0, 0)</string>
     <widget class="QLabel" name="lbl_notification_msg">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>10</x>
        <y>410</y>
-       <width>121</width>
+       <width>301</width>
        <height>31</height>
       </rect>
      </property>
@@ -673,6 +679,9 @@ color: rgb(255, 0, 0)</string>
      </property>
      <property name="text">
       <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
     <widget class="QPushButton" name="btn_import_list_member">
